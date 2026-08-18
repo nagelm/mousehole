@@ -105,6 +105,14 @@ If you change the port on which Mousehole listens with the `MOUSEHOLE_PORT`
 environment variable, make sure to override the
 [healthcheck command](/Dockerfile) accordingly.
 
+### Rust backend (experimental)
+
+There is also a Rust rewrite of the backend under [`rust/`](/rust/README.md) —
+same frontend, same API, same config, same state file, in ~3 MB of resident
+memory instead of ~45. Build it with [`Dockerfile.rust`](/Dockerfile.rust).
+Differences (there are few, and none the UI can see) are documented in
+[docs/rust-rewrite/impact-itinerary.md](/docs/rust-rewrite/impact-itinerary.md).
+
 ## How It Works
 
 On a schedule, Mousehole contacts MAM. If Mousehole has your cookie, it makes a

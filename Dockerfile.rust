@@ -1,0 +1,32 @@
+# syntax=docker/dockerfile:1
+# Rust backend build. The web UI is built exactly like the Bun image builds
+# it — the bundle is embedded into the Rust binary and served verbatim.
+
+FROM oven/bun:1-alpine AS build-web
+WORKDIR /temp/build
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
+ARG GIT_HASH
+ENV PUBLIC_GIT_HASH=${GIT_HASH}
+COPY vite.config.ts ./
+COPY src src
+RUN bun run build
+
+FROM rust:1-alpine AS build-backend
+RUN apk add --no-cache musl-dev
+WORKDIR /work
+COPY rust/Cargo.toml rust/Cargo.lock rust/
+COPY rust/src rust/src
+COPY --from=build-web /temp/build/dist dist
+ARG GIT_HASH
+ENV PUBLIC_GIT_HASH=${GIT_HASH}
+RUN cd rust && cargo build --release
+
+FROM alpine:3 AS release
+COPY --from=build-backend /work/rust/target/release/mousehole /usr/local/bin/mousehole
+EXPOSE 5010/tcp
+# Same timings as the Bun image; the subcommand replaces the bun -e fetch
+# one-liner (and honors MOUSEHOLE_PORT instead of hardcoding 5010).
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD ["mousehole", "healthcheck"]
+CMD ["mousehole"]
