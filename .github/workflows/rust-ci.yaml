@@ -1,0 +1,46 @@
+# Rust backend tests — companion to ci.yaml. Runs in the same rust:1-alpine
+# environment the release image builds in, with a placeholder dist/ when the
+# frontend hasn't been built (rust-embed needs the folder at compile time).
+
+name: Rust CI
+
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - "rust/**"
+      - "Dockerfile.rust"
+      - ".github/workflows/rust-ci.yaml"
+  pull_request:
+    branches:
+      - "master"
+    paths:
+      - "rust/**"
+      - "Dockerfile.rust"
+      - ".github/workflows/rust-ci.yaml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: rust:1-alpine
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: musl build deps + placeholder dist
+        run: |
+          apk add --no-cache musl-dev
+          mkdir -p dist
+          [ -f dist/index.html ] || printf '<!doctype html><title>mousehole placeholder</title>' > dist/index.html
+
+      - name: cargo test
+        working-directory: rust
+        run: cargo test --locked
+
+      - name: cargo clippy
+        working-directory: rust
+        run: |
+          rustup component add clippy
+          cargo clippy --locked -- -D warnings
