@@ -1,0 +1,54 @@
+# Fork-only publishing: builds the Rust image and pushes it to GHCR under
+# this fork, using the built-in GITHUB_TOKEN (no secrets to configure).
+# Lives on the fork-publish branch so the upstream PR branch stays clean.
+
+name: Publish Rust image to GHCR (fork)
+
+on:
+  push:
+    branches:
+      - "fork-publish"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set short git sha
+        id: vars
+        run: echo "short_sha=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_OUTPUT
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.rust
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/${{ github.repository }}:rust
+            ghcr.io/${{ github.repository }}:rust-${{ steps.vars.outputs.short_sha }}
+          build-args: |
+            GIT_HASH=${{ steps.vars.outputs.short_sha }}
+          cache-from: type=gha,scope=fork-rust
+          cache-to: type=gha,mode=max,scope=fork-rust
