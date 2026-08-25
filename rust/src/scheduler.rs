@@ -116,6 +116,20 @@ impl SchedulerHandle {
             inner.transport_failures.store(0, Ordering::SeqCst);
             return;
         }
+        // Orphaned-namespace detector: sharing another container's netns
+        // means that container's RESTART creates a fresh namespace and
+        // leaves this still-running process trapped in the old one — dead
+        // wg0, no eth0, no way back from inside the process (proven live
+        // 2026-08-25: client rebuilds cannot cure it; only a container
+        // restart re-attaches). eth0 vanishing from the namespace is the
+        // crisp signature: exit immediately so the supervisor re-attaches
+        // us to the current namespace.
+        if !std::path::Path::new("/sys/class/net/eth0").exists() {
+            logger::error(
+                "eth0 is gone from this network namespace — the parent                  container restarted and left us orphaned; exiting so the                  supervisor re-attaches us to the live namespace",
+            );
+            std::process::exit(2);
+        }
         let n = inner.transport_failures.fetch_add(1, Ordering::SeqCst) + 1;
         if n >= 9 {
             logger::error(
