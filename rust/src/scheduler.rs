@@ -8,7 +8,7 @@
 //! displayed, and retried at the same fixed cadence. (Details:
 //! docs/rust-rewrite/mam-behavior.md §4–§6.)
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::Arc;
 
 use tokio::sync::broadcast;
@@ -29,7 +29,10 @@ pub struct Scheduler {
 struct Inner {
     mutex: tokio::sync::Mutex<()>,
     store: Store,
-    mam: MamClient,
+    // Rebuildable: see MamClient::rebuilt. Guarded by `mutex` in practice —
+    // every contact holds it — the std Mutex is only for the swap.
+    mam: std::sync::Mutex<MamClient>,
+    transport_failures: AtomicU32,
     interval_seconds: f64,
     timer: std::sync::Mutex<Option<tokio::task::JoinHandle<()>>>,
     next_contact_at: std::sync::Mutex<Option<jiff::Zoned>>,
@@ -48,7 +51,8 @@ impl Scheduler {
             inner: Arc::new(Inner {
                 mutex: tokio::sync::Mutex::new(()),
                 store,
-                mam,
+                mam: std::sync::Mutex::new(mam),
+                transport_failures: AtomicU32::new(0),
                 interval_seconds,
                 timer: std::sync::Mutex::new(None),
                 next_contact_at: std::sync::Mutex::new(None),
@@ -81,15 +85,51 @@ impl SchedulerHandle {
         let result = async {
             let disk = inner.store.read_if_exists()?;
             let base = apply_cookie(disk, new_cookie);
-            let serialized = contact_mam(base.as_ref(), &inner.mam).await;
+            let mam = inner.mam.lock().unwrap().clone();
+            let serialized = contact_mam(base.as_ref(), &mam).await;
             inner.store.write(&serialized)?;
             let _ = inner.notify.send(());
+            self.note_transport_outcome(&serialized);
             Ok(serialized)
         }
         .await;
         // `finally`: always reschedule, before the caller builds a response.
         self.schedule_next();
         result
+    }
+
+    /// Netns-bounce self-heal (2026-08-25): consecutive TRANSPORT failures
+    /// (MAM unreached — cookie rejections are `Reached` and never count)
+    /// first rebuild the HTTP client, then give up the process entirely so
+    /// the supervisor's `unless-stopped` restarts it — the one recovery
+    /// proven to work when the shared network namespace is bounced under
+    /// us. 9 failures at the default 300 s interval bounds the wedge to
+    /// ~45 min instead of forever-with-a-green-healthcheck.
+    fn note_transport_outcome(&self, serialized: &SerializedState) {
+        use crate::state::SerializedMamContact as C;
+        let inner = &self.inner;
+        let unreached = matches!(
+            serialized.last_mam_contact,
+            Some(C::Unreached { .. })
+        );
+        if !unreached {
+            inner.transport_failures.store(0, Ordering::SeqCst);
+            return;
+        }
+        let n = inner.transport_failures.fetch_add(1, Ordering::SeqCst) + 1;
+        if n >= 9 {
+            logger::error(
+                "9 consecutive transport failures — client rebuilds did not                  recover; exiting so the supervisor restarts the process",
+            );
+            std::process::exit(2);
+        }
+        if n % 3 == 0 {
+            logger::error(&format!(
+                "{n} consecutive transport failures — rebuilding the HTTP                  client (stale connector state after a namespace bounce?)"
+            ));
+            let fresh = inner.mam.lock().unwrap().rebuilt();
+            *inner.mam.lock().unwrap() = fresh;
+        }
     }
 
     /// §5.2 — cancel-and-rearm one-shot timer; fixed interval, no jitter,

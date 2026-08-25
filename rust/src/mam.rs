@@ -75,6 +75,16 @@ impl MamClient {
         }
     }
 
+    /// A fresh client with identical settings — the netns-bounce recovery
+    /// path: after qbittorrent (whose network namespace we share) restarts,
+    /// this client can wedge into permanent transport errors while the
+    /// namespace itself is healthy (live 2026-08-25: 5 h of failed contacts,
+    /// instant recovery on process restart). Rebuilding discards whatever
+    /// connector/resolver state went stale.
+    pub fn rebuilt(&self) -> Self {
+        Self::new(self.timeout_seconds, Some(self.base_url.clone()))
+    }
+
     fn transport_error(&self, e: &reqwest::Error, url: &str) -> AppError {
         if e.is_timeout() {
             error::timeout_error(url, self.timeout_seconds)
