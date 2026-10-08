@@ -9,14 +9,14 @@
 //! - sse:       server-sent events stream               (api-contract.md §7)
 //! - mam:       MAM dynamic-seedbox contact + host info (mam-behavior.md)
 //! - scheduler: contact cycle + manual trigger          (mam-behavior.md §4-6)
-//! - state:     persisted JSON state + migrations       (state-and-build.md §1)
-//! - assets:    embedded Vite frontend bundle           (state-and-build.md §2.3)
+//! - state:     persisted JSON state + migrations
+//! - assets:    embedded Vite frontend bundle
 //!
 //! Clippy: `result_large_err` is allowed crate-wide — `AppError` carries a
 //! ready-to-send response body/headers by design, and boxing it would clutter
 //! every handler for zero practical gain at this request rate.
 //!
-//! Startup order is contract (state-and-build.md §4): config (fail fast) →
+//! Startup order is contract: config (fail fast) →
 //! log threshold → context → bind → banner → security validation (may abort)
 //! → scheduler start. Shutdown: stop scheduler (cancel timer, drain the
 //! in-flight contact) → stop server → exit 0.

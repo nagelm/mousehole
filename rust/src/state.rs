@@ -5,7 +5,6 @@
 //! Bun backend writes. Only ENOENT means "fresh install"; any other read
 //! problem is a hard error, because treating an unreadable file as "no state"
 //! would let the next contact write a cookieless state over the real one.
-//! (Full schema/migration details: docs/rust-rewrite/state-and-build.md §1.)
 
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};

@@ -110,8 +110,8 @@ environment variable, make sure to override the
 There is also a Rust rewrite of the backend under [`rust/`](/rust/README.md) —
 same frontend, same API, same config, same state file, in ~3 MB of resident
 memory instead of ~45. Build it with [`Dockerfile.rust`](/Dockerfile.rust).
-Differences (there are few, and none the UI can see) are documented in
-[docs/rust-rewrite/impact-itinerary.md](/docs/rust-rewrite/impact-itinerary.md).
+Differences (there are few, and none the UI can see) are listed in
+[rust/README.md](/rust/README.md#known-deliberate-differences).
 
 ## How It Works
 
