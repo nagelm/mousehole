@@ -1,14 +1,14 @@
 //! mousehole (Rust backend) — drop-in replacement for the Bun backend.
 //!
-//! Module map mirrors the spec documents in docs/rust-rewrite/:
-//! - config:    env parsing incl. _FILE variants        (config-auth-boundary.md §1)
-//! - logger:    [LEVEL] stdout logging contract         (config-auth-boundary.md §5)
-//! - boundary:  host/auth/origin/content-type checks    (config-auth-boundary.md §4)
-//! - session:   password login sessions + bearer auth   (config-auth-boundary.md §2)
-//! - api:       route handlers + error contract         (api-contract.md)
-//! - sse:       server-sent events stream               (api-contract.md §7)
-//! - mam:       MAM dynamic-seedbox contact + host info (mam-behavior.md)
-//! - scheduler: contact cycle + manual trigger          (mam-behavior.md §4-6)
+//! Module map:
+//! - config:    env parsing incl. _FILE variants
+//! - logger:    [LEVEL] stdout logging contract
+//! - boundary:  host/auth/origin/content-type checks
+//! - session:   password login sessions + bearer auth
+//! - api:       route handlers + error contract
+//! - sse:       server-sent events stream
+//! - mam:       MAM dynamic-seedbox contact + host info
+//! - scheduler: contact cycle + manual trigger
 //! - state:     persisted JSON state + migrations
 //! - assets:    embedded Vite frontend bundle
 //!

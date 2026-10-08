@@ -3,7 +3,7 @@
 //! than run half-configured. `Config::from_env` is a pure function of an env
 //! map plus an injected file reader (the `_FILE` seam), so tests stay
 //! hermetic. The error strings are user-facing and documented — don't reword
-//! them. (Full matrix: docs/rust-rewrite/config-auth-boundary.md §1.)
+//! them.
 
 use std::collections::HashMap;
 use std::fmt;

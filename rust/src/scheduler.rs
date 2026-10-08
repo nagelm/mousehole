@@ -5,8 +5,7 @@
 //! write re-arms the timer) and BEFORE the caller builds its response, so
 //! `nextContactAt` is always fresh — the countdown UI keys off it.
 //! Deliberately no jitter, no backoff, no retry: a 429/403 is recorded,
-//! displayed, and retried at the same fixed cadence. (Details:
-//! docs/rust-rewrite/mam-behavior.md §4–§6.)
+//! displayed, and retried at the same fixed cadence.
 
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::Arc;

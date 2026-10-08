@@ -1,4 +1,4 @@
-//! MAM external API client per docs/rust-rewrite/mam-behavior.md §1–§3.
+//! MAM external API client.
 //! Manual cookie handling only — no reqwest cookie store, ever (§3).
 
 use std::net::Ipv4Addr;

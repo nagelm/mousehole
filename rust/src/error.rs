@@ -1,4 +1,4 @@
-//! Error model per docs/rust-rewrite/api-contract.md §2.5 + §9.
+//! Error model.
 //! Every non-2xx JSON response (except POST /login's {ok,message} envelope)
 //! serializes an `ErrorBody`. Message templates are wire contract.
 

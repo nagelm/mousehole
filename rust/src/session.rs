@@ -1,4 +1,4 @@
-//! Sessions per docs/rust-rewrite/config-auth-boundary.md §2.
+//! Sessions.
 //! In-memory only (restart logs everyone out, by design). Fixed lifetime, no
 //! sliding renewal. Deletion (logout, expiry, reaper) fires the SSE-close
 //! callback so the client re-pulls /state, gets 401, and lands on login.

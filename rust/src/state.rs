@@ -104,7 +104,7 @@ impl State {
     }
 }
 
-// ---- classification (api-contract.md §2.4): status code only, never msg ----
+// ---- classification: status code only, never msg ----
 
 pub fn classify(contact: Option<&SerializedMamContact>) -> &'static str {
     match contact {
@@ -121,7 +121,7 @@ pub fn classify(contact: Option<&SerializedMamContact>) -> &'static str {
     }
 }
 
-// ---- PublicState (api-contract.md §2.1) ----
+// ---- PublicState ----
 
 #[derive(Debug, Clone, Serialize)]
 pub struct PublicState {

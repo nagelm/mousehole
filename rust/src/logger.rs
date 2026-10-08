@@ -1,4 +1,4 @@
-//! Log contract per docs/rust-rewrite/config-auth-boundary.md §5:
+//! Log contract:
 //! `[LEVEL] message` on stdout for every level; threshold from
 //! MOUSEHOLE_LOG_LEVEL; ANSI on the prefix only when stdout is a TTY and
 //! NO_COLOR is absent (present-but-empty still disables).
