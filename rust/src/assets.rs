@@ -1,5 +1,5 @@
-//! Embedded Vite frontend bundle per docs/rust-rewrite/api-contract.md §8 and
-//! state-and-build.md §5.3. Served under /web with NO boundary checks (the
+//! Embedded Vite frontend bundle.
+//! Served under /web with NO boundary checks (the
 //! login page needs its assets), no cache headers, no SPA fallback — a miss
 //! falls through to the global JSON 404.
 

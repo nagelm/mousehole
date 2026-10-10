@@ -1,4 +1,4 @@
-//! RFC 9557 zoned timestamps per docs/rust-rewrite/api-contract.md §2.3.
+//! RFC 9557 zoned timestamps.
 //! The frontend parses with `Temporal.ZonedDateTime.from`, which THROWS
 //! without the bracketed IANA annotation — jiff's `Zoned` Display emits
 //! exactly that form (`2026-08-18T09:05:00.123-05:00[America/Chicago]`).

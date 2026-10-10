@@ -4,7 +4,6 @@
 //! retry hints. Streams register under their session id ("" for token/no-auth
 //! clients, which are never force-closed); deleting a session closes its
 //! streams cleanly so the browser reconnects, 401s, and lands on login.
-//! (Wire details: docs/rust-rewrite/api-contract.md §7.)
 
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};

@@ -3,7 +3,6 @@
 //! pure functions over header values, wired up per-route in api.rs. Failure
 //! precedence is simply the order a route lists its checks: host → auth →
 //! origin → json; the global body limit runs before all of them.
-//! (Exact semantics: docs/rust-rewrite/config-auth-boundary.md §4.)
 
 use crate::config::{AllowedHosts, AllowedOrigins, AuthConfig, Config};
 use crate::error::{self, AppError};

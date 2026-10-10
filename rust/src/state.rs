@@ -5,7 +5,6 @@
 //! Bun backend writes. Only ENOENT means "fresh install"; any other read
 //! problem is a hard error, because treating an unreadable file as "no state"
 //! would let the next contact write a cookieless state over the real one.
-//! (Full schema/migration details: docs/rust-rewrite/state-and-build.md §1.)
 
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
@@ -105,7 +104,7 @@ impl State {
     }
 }
 
-// ---- classification (api-contract.md §2.4): status code only, never msg ----
+// ---- classification: status code only, never msg ----
 
 pub fn classify(contact: Option<&SerializedMamContact>) -> &'static str {
     match contact {
@@ -122,7 +121,7 @@ pub fn classify(contact: Option<&SerializedMamContact>) -> &'static str {
     }
 }
 
-// ---- PublicState (api-contract.md §2.1) ----
+// ---- PublicState ----
 
 #[derive(Debug, Clone, Serialize)]
 pub struct PublicState {

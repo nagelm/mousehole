@@ -38,9 +38,21 @@ bodies, cookies, SSE frames, even the bytes of `state.json`. Run it yourself:
 bash rust/parity.sh
 ```
 
-Known deliberate differences (all invisible to the UI) are listed in
-`docs/rust-rewrite/impact-itinerary.md` — worth a read if you're deciding
-whether to trust this thing.
+### Known deliberate differences
+
+All of these are invisible to the UI:
+
+- A timeout while reading a request body is classified `timeout-error` (Bun gives `unhandled-error`).
+- Timestamps carry full nanosecond precision from jiff (Bun/Temporal gives milliseconds).
+- Two corners keep serde's wording: the `json-parse-error` cause and the corrupt-`state.json` `schema-error` detail.
+- Error logs print the message only, with no stack.
+- Session expiry runs on a tokio sleep task.
+- The final image is based on `alpine:3`.
+- Not carried over: Bun's dev proxy mode, `.env` / `.env.development` auto-loading and `NODE_ENV` switching (the Rust binary always runs as production).
+
+Image tags (in `tmmrtn/mousehole`): `:rust` (stable pointer), `:<version>-rust`, `:edge-rust` (master) and `:pr-<n>-rust`. `latest` and the semver tags stay on the Bun image. The arm64 build has only been verified on amd64.
+
+Dev loop: `rust/build.sh check|test|release` runs cargo inside `rust:1-alpine`; `bash rust/parity.sh` diffs both backends; `rust-ci.yaml` runs `cargo test` and clippy on changes under `rust/`.
 
 ## For maintainers: the zero-effort investigation path
 

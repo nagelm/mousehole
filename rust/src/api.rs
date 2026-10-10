@@ -1,4 +1,4 @@
-//! Router assembly + handlers per docs/rust-rewrite/api-contract.md.
+//! Router assembly + handlers.
 //! Boundary ladders run inside each handler in the contract's textual order
 //! (host → auth → origin → json); the global body limit and the 405→404 and
 //! debug-log layers wrap everything.
